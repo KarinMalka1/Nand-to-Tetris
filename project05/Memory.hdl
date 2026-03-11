@@ -1,0 +1,66 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/05/Memory.hdl
+
+/**
+ * The complete address space of the Hack computer's memory,
+ * including RAM and memory-mapped I/O. 
+ * The chip facilitates read and write operations, as follows:
+ *     Read:  out(t) = Memory[address(t)](t)
+ *     Write: if load(t-1) then Memory[address(t-1)](t) = in(t-1)
+ * In words: the chip always outputs the value stored at the memory 
+ * location specified by address. If load==1, the in value is loaded 
+ * into the memory location specified by address. This value becomes 
+ * available through the out output from the next time step onward.
+ * Address space rules:
+ * Only the upper 16K+8K+1 words of the Memory chip are used. 
+ * Access to address>0x6000 is invalid. Access to any address in 
+ * the range 0x4000-0x5FFF results in accessing the screen memory 
+ * map. Access to address 0x6000 results in accessing the keyboard 
+ * memory map. The behavior in these addresses is described in the 
+ * Screen and Keyboard chip specifications given in the book.
+ */
+
+CHIP Memory {
+    IN in[16], load, address[15];
+    OUT out[16];
+
+    PARTS:
+	//// Replace this comment with your code.
+    //If address[14] == 0, it’s RAM16K
+    Not(in=address[14] , out=isRAM16K );
+    And(a=load , b=isRAM16K , out=loadRAM );
+    //If address[14] == 1 && address[13] == 0, it’s Screen
+    Not(in=address[13] , out=Notaddress13 );
+    And(a=address[14] , b=Notaddress13 , out=Inscreen );
+    And(a=load, b=Inscreen, out=loadScreen);
+
+
+    //If address[14] == 1 && address[13] == 1 && rest == 0, it’s Keyboard
+    And(a=address[14] , b=address[13] , out=out1 );
+    Or8Way(in=address[0..7] , out=outor07 );
+    Or8Way(
+    in[0]=address[8],
+    in[1]=address[9],
+    in[2]=address[10],
+    in[3]=address[11],
+    in[4]=address[12],
+    in[5]=false,
+    in[6]=false,
+    in[7]=false,
+    out=outor812 );
+    Or(a=outor07 , b=outor812 , out=inkeyboard );
+    Not(in=inkeyboard , out=Notinkeyboard );
+    And(a=out1 , b=Notinkeyboard , out=outkeyboard );
+
+    RAM16K(in=in,load=loadRAM,address=address[0..13],out=outRAM16K);
+    Screen(in=in , load=loadScreen , address=address[0..12] , out=outScreen );
+    Keyboard(out=outKeyboard );
+
+
+    Or16(a=outScreen , b=outKeyboard , out=NotRAM );
+    Not16(in=NotRAM , out=isRAM );
+    Mux16(a=outRAM16K , b=outScreen , sel=Inscreen , out=RAMorscreen );
+    Mux16(a=RAMorscreen , b=outKeyboard , sel=outkeyboard , out=out  );
+}
