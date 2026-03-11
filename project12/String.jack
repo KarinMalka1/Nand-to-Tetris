@@ -1,0 +1,177 @@
+// This file is part of nand2tetris, as taught in The Hebrew University, and
+// was written by Aviv Yaish. It is an extension to the specifications given
+// [here](https://www.nand2tetris.org) (Shimon Schocken and Noam Nisan, 2017),
+// as allowed by the Creative Common Attribution-NonCommercial-ShareAlike 3.0
+// Unported [License](https://creativecommons.org/licenses/by-nc-sa/3.0/).
+
+/**
+ * Represents character strings. In addition for constructing and disposing
+ * strings, the class features methods for getting and setting individual
+ * characters of the string, for erasing the string's last character,
+ * for appending a character to the string's end, and more typical
+ * string-oriented operations.
+ */
+class String {
+    /** constructs a new empty string with a maximum length of maxLength
+     *  and initial length of 0. */
+    field Array stringArr;
+    field int maxLen; 
+    field int length; 
+    field boolean flag; // true= the num is negative
+
+    constructor String new(int maxLength) {
+        if (maxLength < 0) { // Maximum length must be non-negative
+            do Sys.error(14);
+        }
+        if (maxLength = 0) {
+            let maxLength = 1; // the array length should be at least 1
+        }
+        let stringArr = Array.new(maxLength);
+        let maxLen = maxLength;//muy importante!
+        let length = 0;
+        let flag = false;
+        return this;
+    }
+
+    /** Disposes this string. */
+    method void dispose() {
+        do stringArr.dispose();
+        let length = 0;
+        return;
+    }
+
+    /** Returns the current length of this string. */
+    method int length() {
+        return length;
+    }
+
+    /** Returns the character at the j-th location of this string. */
+    method char charAt(int j) {
+        if ((j < 0) | (~(j < length))) { // String index out of bounds
+            do Sys.error(15);
+        }
+
+        return stringArr[j];
+    }
+
+    /** Sets the character at the j-th location of this string to c. */
+    method void setCharAt(int j, char c) {
+        if ((j < 0) | (~(j < length))) { // String index out of bounds
+            do Sys.error(16);
+        }
+
+        let stringArr[j] = c;
+        return;
+    }
+
+    /** Appends c to this string's end and returns this string. */
+    method String appendChar(char c) {
+        if (~(length < maxLen)) { // String is full
+            do Sys.error(17);
+        }
+
+        if (length < maxLen){
+            let stringArr[length] = c;
+            let length = length + 1;
+        }
+        return this;
+    }
+
+    /** Erases the last character from this string. */
+    method void eraseLastChar() {
+        if (length = 0) { // String is empty
+            do Sys.error(18);
+        }
+
+        if (~(stringArr=0)){ //there are char in newString, the array is not null (null = 0 in Jack)
+            let stringArr[length-1] = 0;
+            let length = length - 1;
+        }
+        return;
+    }
+
+    /** Returns the integer value of this string, 
+     *  until a non-digit character is detected. */
+    method int intValue() {
+        // Pseudocode:
+        // 1. let val = 0
+        // 2. for (i = 0 .. str.length()) do
+        // 3.   let d = integer value of str.charAt(i)
+        // 4.   let val = (val*10) + d
+        // 5. return val
+        var int val, i, d;
+        let val = 0;
+        let i = 0;
+        if (stringArr[0] = 45){
+            let flag = true;
+            let i =1;
+        }
+        while(i < length){
+            if((stringArr[i] < 58) & (stringArr[i] > 47)){
+                let d = stringArr[i]-48;
+                let val = (val *10) + d;
+            }
+            else{
+               return val;
+            }
+            let i = i+1;
+        }
+        if (flag){
+            let val = -val;
+        }
+        return val;
+    }
+
+    /** Sets this string to hold a representation of the given value. */
+    method void setInt(int val) {
+        // Pseudocode:
+        // 1. let lastDigit = val % 10
+        // 2. let c = character representing lastDigit
+        // 3. if (val < 10)
+        // 4.   return c (as a string)
+        // 5. else
+        // 6.   return int2String(val / 10).appendChar(c)
+        let length = 0;// Reset the string first
+        //error 19
+        if (val < 0) {
+            let val = -val;
+            do appendChar(45); // Append '-' (ASCII 45)
+        }
+        do setIntHelper(val);
+        return;
+    }
+
+    method void setIntHelper(int val) {
+        var int temp,lastDigit;
+        var int c;
+        // Recursive step: process the leading digits first
+        if (val < 10) {
+            do appendChar(val+48); // Convert int to char (ASCII)
+        }
+        else {
+            let temp = val/10;
+            let lastDigit = val - (temp*10);
+            let val = temp;
+            let c = lastDigit + 48; // turn digit to char
+            do setIntHelper(val); 
+            do appendChar(c); // Append current digit after returning
+        }
+        return;
+    }
+   
+
+    /** Returns the new line character. */
+    function char newLine() {
+        return 128;
+    }
+
+    /** Returns the backspace character. */
+    function char backSpace() {
+        return 129;
+    }
+
+    /** Returns the double quote (") character. */
+    function char doubleQuote() {
+        return 34;
+    }
+}

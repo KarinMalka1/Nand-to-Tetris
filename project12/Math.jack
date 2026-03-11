@@ -1,0 +1,195 @@
+// This file is part of nand2tetris, as taught in The Hebrew University, and
+// was written by Aviv Yaish. It is an extension to the specifications given
+// [here](https://www.nand2tetris.org) (Shimon Schocken and Noam Nisan, 2017),
+// as allowed by the Creative Common Attribution-NonCommercial-ShareAlike 3.0
+// Unported [License](https://creativecommons.org/licenses/by-nc-sa/3.0/).
+
+/**
+ * A library of commonly used mathematical functions.
+ * Note: Jack compilers implement multiplication and division using OS method calls.
+ */
+class Math {
+
+        static Array bitPositions;
+        // static var for the divide function for the sum to be updated in recursion
+        static int accum;
+
+        /** Initializes the library. */
+        function void init() {
+            //  bit masks for identifying individual bits positions during arithmetic operations
+            let bitPositions = Array.new(16);
+            let bitPositions[0] = 1;
+            let bitPositions[1] = 2;
+            let bitPositions[2] = 4;
+            let bitPositions[3] = 8;
+            let bitPositions[4] = 16;
+            let bitPositions[5] = 32;
+            let bitPositions[6] = 64;
+            let bitPositions[7] = 128;
+            let bitPositions[8] = 256;
+            let bitPositions[9] = 512;
+            let bitPositions[10] = 1024;
+            let bitPositions[11] = 2048;
+            let bitPositions[12] = 4096;
+            let bitPositions[13] = 8192;
+            let bitPositions[14] = 16384;
+            let bitPositions[15] = 16384 + 16384;
+            return;
+        }
+
+        /** Returns the absolute value of x. */
+        function int abs(int x) {
+            if(x < 0){
+                //x = -5 (1111111111111011), !x becomes 0000000000000100
+                //Adding 1 gives 0000000000000101, which is +5
+                // -x = ~x + 1
+            
+                return -x;
+            }
+            return x;
+        }
+
+        /** 
+         * Returns the product of x and y. 
+         * When a Jack compiler detects the multiplication operator '*' in the 
+         * program's code, it handles it by invoking this method. In other words,
+         * the Jack expressions x*y and multiply(x,y) return the same value.
+         */
+        function int multiply(int x, int y) {
+            // Pseudocode:
+            // 1. let sum = 0
+            // 2. let shiftedx = x
+            // 3. for i = 0 ... n-1 do
+            // 4.   if ((i-th bit of y) == 1)
+            // 5.      let sum = sum + shiftedx
+            // 6.   let shiftedx = 2*shiftedx
+            // 7. return sum
+            var int sum, shiftedx, i;
+            let sum = 0;
+            let shiftedx = x;
+            let i = 0;
+            while(i < 16){
+            //we scan y bit by bit by moving the mask bitPositions
+                if((y & bitPositions[i]) = bitPositions[i]){
+                    let sum = sum + shiftedx;    
+                }
+                let i = i + 1;
+                let shiftedx = shiftedx + shiftedx;//shiftleft once
+            }
+            return sum;
+        }
+
+        /** 
+         * Returns the integer part of x/y.
+         * When a Jack compiler detects the multiplication operator '/' in the 
+         * program's code, it handles it by invoking this method. In other words,
+         * the Jack expressions x/y and divide(x,y) return the same value.
+         */
+        function int divide(int x, int y) {
+            // This should be implemented without using multiplication.
+            // Hint: updating the value of 2*q*y in the "if" statement requires
+            // at most a single addition operator at every recursion step.
+            // Pseudocode:
+            // 1. if (y > x) return 0
+            // 2. let q = divide(x, 2*y)
+            // 3. if ((x - 2*q*y) < y)
+            // 4.   return 2*q
+            // 5. else
+            // 6.   return 2*q + 1
+
+            var int q;
+            var boolean result_is_neg;
+            if (y = 0) { // error if y=0 because is divide by 0
+                do Sys.error(3);
+            }
+            let result_is_neg = ((x < 0) & (y > 0)) | ((x > 0) & (y < 0));
+            let x = Math.abs(x);
+            let y = Math.abs(y);
+            let q = Math.divideHelper(x, y);
+            
+            if (result_is_neg) {
+                return -q;
+            }
+            return q;
+        }
+
+        function int divideHelper(int x, int y) {
+            var int q;
+            
+            if ((y > x) | (y < 0)) { // y < 0 checks for overflow
+                let accum = 0; // reset accum
+                return 0;
+            }
+            
+            let q = Math.divideHelper(x, y + y);           
+            if ((x - accum) < y) {
+                return q + q;
+            }
+            else {
+                let accum = accum + y;
+                return q + q + 1;
+            }
+        }
+
+        /** Returns the integer part of the square root of x. */
+        function int sqrt(int x) {
+            // This should be implemented without using multiplication or division.
+            // Pseudocode (where '**' is the mathematical power function):
+            // 1. let y = 0
+            // 2. for j = (n/2 - 1) ... 0 do
+            // 3.   if ((y + 2**j)**2 <= x) then let y = y + 2**j
+            // 4. return y
+            var int y, i, j;
+            var int ySqrt;   // Tracks y^2
+            var int term;    // Tracks middle term: y * 2^(i+1)
+            var int newSqrt; // Candidate for new y^2
+            if (x < 0) { //Cannot compute square root of a negative number
+                do Sys.error(4);
+            }
+
+            let y = 0;
+            let ySqrt = 0;
+            let i = 7;       // 16-bit integers: roots are 0..181, so start at 2^7
+
+            while (~(i < 0)) {
+                // Calculate term = y * 2^(i+1) using repeated addition (shift left)
+                let term = y;
+                let j = 0;
+                while (j < (i + 1)) {
+                    let term = term + term;
+                    let j = j + 1; // Fixed: Increment j, not i
+                }
+
+                // Calculate (y + 2^i)^2 = y^2 + term + 2^(2*i)
+                // Assumes twoToThe array is initialized. 
+                // If you use bitPositions, replace 'twoToThe' with 'bitPositions'
+                let newSqrt = ySqrt + term + bitPositions[i + i];
+
+                // Check if newSqrt <= x.
+                // Also check (newSqrt > 0) to prevent overflow wraparound errors.
+                if ((~(newSqrt > x)) & (newSqrt > 0)) {
+                    let y = y + bitPositions[i];
+                    let ySqrt = newSqrt;
+                }
+                
+                let i = i - 1;
+            }
+            return y;
+        }
+
+        /** Returns the greater number. */
+        function int max(int a, int b) {
+            if(a < b){
+                return b;
+            }
+            return a;
+        }
+
+        /** Returns the smaller number. */
+        function int min(int a, int b) {
+            if(a > b){
+                return b;
+            }
+            return a;
+        }
+}
