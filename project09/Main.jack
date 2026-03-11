@@ -1,0 +1,12 @@
+class Main{
+    function void main() {
+        var RunPong game_manager;
+        let game_manager = RunPong.new();
+        do game_manager.run();
+        do game_manager.dispose();
+        return;
+    }
+    function void dispose() {
+        return;
+    }
+}

@@ -1,0 +1,83 @@
+class Square {
+    field int x, y, size;
+    field boolean active;
+
+    constructor Square new(int x_pos, int y_pos, int s) {
+        let x = x_pos;
+        let y = y_pos;
+        let size = s;
+        let active = false;
+        return this;
+    }
+
+    method void draw() {
+        var int x2, y2;
+        if (active) {
+            let x2 = x + size;
+            let y2 = y + size;
+        }
+        if (x2 > 511) {
+            let x2 = 511;
+        }
+        if (y2 > 255) {
+            let y2 = 255;
+        }
+        if (x2 > x) {
+            if (y2 > y) {
+                do Screen.drawRectangle(x, y, x2, y2);
+            }
+        }
+        return;
+    }
+
+    method boolean checkCollision(int ballX, int ballY, int ballRadius) {
+        var boolean collides;
+        let collides = false;
+
+        if (active) {
+            if ((ballX + ballRadius) > x) {
+                if ((ballX - ballRadius) < (x + size)) {
+                    if ((ballY + ballRadius) > y) {
+                        if ((ballY - ballRadius) < (y + size)) {
+                            let collides = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return collides;
+    }
+
+    method void activate() {
+        let active = true;
+        return;
+    }
+
+    method void move() {
+        if (active) {
+            if (x + size < 512) {
+                let x = x + 2;   
+            } else {
+                let active = false;
+                do reset();
+            }
+        }
+        return;
+    }
+
+    method void reset() {
+        let x = 0;        
+        let y = 80;     
+        let active = true;
+        return;
+    }
+
+    method void dispose() {
+        let x = 0;
+        let y = 0;
+        let size = 0;
+        let active = false;
+        return;
+    }
+}

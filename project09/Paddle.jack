@@ -1,0 +1,82 @@
+class Paddle {
+    field int x;
+    field int y;
+    field int width;
+    field int height;
+    field int x_velocity;
+    field int y_velocity;
+
+    constructor Paddle new() {
+        let width = 45;
+        let height = 15;
+
+        let x = 250;
+        let y = 220;
+
+        return this;
+    }
+
+    method void move_up() {
+        if (y > 5) {
+            let y = y - 3;
+        }
+        return;
+    }
+
+    method void move_down() {
+        if (y + height < 250) {
+            let y = y + 3;
+        }
+        return;
+    }
+
+    method void move_right(){
+        if(x + width < 505){
+            let x = x + 3;
+        }
+        return;
+    }
+    method void move_left(){
+        if(x > 5){
+            let x = x - 3;
+        }
+        return;
+    }
+
+    method int get_x() {
+        return x;
+    }
+
+    method int get_y() {
+        return y;
+    }
+
+    method int get_width() {
+        return width;
+    }
+
+    method int get_height() {
+        return height;
+    }
+
+    method void dispose() {
+        return;                           // !!!!!!!!!!!!!!!!!! is it enough?
+    }
+    method void reset(){
+        let x = 250;
+        let y = 220;
+        return;
+    }
+
+    method void set_size(int w, int h) {
+        let width = w;
+        let height = h;
+        return;
+    }
+
+    method void set_velocity(int vx) {
+        let x_velocity = vx;
+        return;
+    }
+
+}

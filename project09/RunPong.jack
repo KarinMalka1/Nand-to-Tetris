@@ -1,0 +1,337 @@
+class RunPong{
+    field Paddle paddle;
+    field Ball ball;
+    field int collision_counter;
+    field boolean velocity_increased;
+    field Square square;
+    
+
+    constructor RunPong new() {
+        let paddle = Paddle.new();
+        let ball = Ball.new();
+        let collision_counter = 0;
+        let velocity_increased = false;
+        let square = Square.new(50, 80, 20);  
+
+        return this;
+    }
+
+    method void run() {
+        var boolean forever;
+        var int key;
+        var int modulo;
+        var int version;
+        var int ball_velocity_choice;
+        var int ball_size_choice;
+        var int paddle_size_choice;
+        var int paddle_velocity_choice;
+        var int row;
+        var int col;
+        var Array paddle_velocities;
+        var int paddle_velocities_block;
+        var String print_string;
+        let forever = true;
+
+        //game version
+        do Output.printString("Choose the version: ");
+        do Output.println();
+        do Output.printString("1. Easy");
+        do Output.println();
+        do Output.printString("2. Hard");
+        do Output.println();
+        let version = Keyboard.readInt("Enter 1 or 2: ");
+
+        //ball size
+        do Output.printString("Choose the size of the ball: ");
+        do Output.println();
+        do Output.printString("1. Easy (Big)");
+        do Output.println();
+        do Output.printString("2. Hard (Small)");
+        do Output.println();
+        let ball_size_choice = Keyboard.readInt("Enter 1 or 2: ");
+        if (ball_size_choice = 1) {
+            do ball.set_radius(10); 
+        } else {
+            do ball.set_radius(6); 
+        }
+
+        //ball velocity
+        do Output.printString("Choose the velocity of the ball: ");
+        do Output.println();
+        do Output.printString("1. Easy (Slow)");
+        do Output.println();
+        do Output.printString("2. Hard (Fast)");
+        do Output.println();
+        let ball_velocity_choice = Keyboard.readInt("Enter 1 or 2: ");
+        if (ball_velocity_choice = 1) {
+            do ball.set_velocity(1, 1);
+        } else {
+            do ball.set_velocity(2, 1);
+        }
+
+        //paddle size
+        do Output.printString("Choose the size of the paddle: ");
+        do Output.println();
+        do Output.printString("1. Easy (Big)");
+        do Output.println();
+        do Output.printString("2. Hard (Small)");
+        do Output.println();
+        let paddle_size_choice = Keyboard.readInt("Enter 1 or 2: ");
+        if (paddle_size_choice = 1) {
+            do paddle.set_size(40, 8); 
+        } else {
+            do paddle.set_size(28, 8); 
+        }
+
+        //paddle velocity
+        let paddle_velocities = Array.new(2);
+        let paddle_velocities[0] = 3; 
+        let paddle_velocities[1] = 5;
+        let paddle_velocities_block = Memory.alloc(2);
+        do Memory.poke(paddle_velocities_block, 3);      
+        do Memory.poke(paddle_velocities_block + 1, 5); 
+        do Output.printString("Choose the velocity of the paddle: ");
+        do Output.println();
+        do Output.printString("1. Easy (Slow)");
+        do Output.println();
+        do Output.printString("2. Hard (Fast)");
+        do Output.println();
+        let paddle_velocity_choice = Keyboard.readInt("Enter 1 or 2: ");
+        if (paddle_velocity_choice = 1) {
+            do paddle.set_velocity(3); 
+        } else {
+            do paddle.set_velocity(5); 
+        }
+        do Array.dispose(paddle_velocities);
+        do Memory.deAlloc(paddle_velocities_block);
+
+        while (forever){
+            do draw();
+
+            let key = Keyboard.keyPressed();
+
+            if (key = 132) {
+                do paddle.move_right();
+            }
+            if (key = 130) {
+                do paddle.move_left();
+            }
+            if (key = 131) {
+                do paddle.move_up();
+            }
+            if (key = 133) {
+                do paddle.move_down();
+            }
+
+            do ball.move();
+            do square.move();
+            if (square.checkCollision(ball.get_x(), ball.get_y(), ball.get_radius())) {
+                do ball.flip_x();
+                do ball.flip_y();
+            }
+
+
+            if (checkCollision()) {
+                do ball.flip_x();
+                do ball.flip_y();
+                let collision_counter = collision_counter + 1;
+            }
+
+            if(ball.get_wall_counter() = 15){
+                do Output.moveCursor(9, 24); 
+                do Output.printString("Reduced ball!");
+                do Output.println(); 
+                do Sys.wait(750);
+                do draw();
+
+                do ball.reduce_radius();
+                do ball.increase_wall_counter();
+            }
+
+            if (ball.get_wall_counter() = 1) {
+                do square.activate();
+            }
+
+            if(ball.get_wall_counter() = 30){
+                do Output.moveCursor(9, 24); 
+                do Output.printString("Back to a normal ball!");
+                do Output.println(); 
+                do Sys.wait(750);
+                do draw();
+
+                do ball.increase_radius();
+                do ball.increase_wall_counter();
+            }
+            if(ball.get_wall_counter() = 45){
+                do Output.moveCursor(9, 24); 
+                do Output.printString("Increased ball!");
+                do Output.println(); 
+                do Sys.wait(750);
+                do draw();
+
+                do ball.increase_radius();
+                do ball.increase_wall_counter();
+            }
+            if(ball.get_wall_counter() = 80){
+                do Output.moveCursor(9, 24); 
+                do Output.printString("Back to a normal ball!");
+                do Output.println(); 
+                do Sys.wait(750);
+                do draw();
+
+                do ball.reduce_radius();
+                do ball.increase_wall_counter();
+            }
+            if(ball.get_wall_counter() = 100){
+                do Output.moveCursor(9, 24); 
+                do Output.printString("Increased ball!");
+                do Output.println(); 
+                do Sys.wait(750);
+                do draw();
+
+                do ball.increase_radius();
+                do ball.increase_wall_counter();
+            }
+            if(ball.get_wall_counter() = 115){
+                do Output.moveCursor(9, 24); 
+                do Output.printString("Back to a normal ball!");
+                do Output.println(); 
+                do Sys.wait(750);
+                do draw();
+
+                do ball.reduce_radius();
+                do ball.increase_wall_counter();
+            }
+
+            if(collision_counter = 5){
+                do ball.increase_velocity();
+                let collision_counter = collision_counter + 1;
+                let velocity_increased = true;
+            }
+            if(velocity_increased){
+                if(collision_counter = 12){
+                    do ball.reduce_velocity();
+                    let collision_counter = collision_counter + 1;
+                    let velocity_increased = false;
+                }
+            }
+            if(ball.get_is_out()){
+                do Screen.clearScreen();
+                do Output.moveCursor(9, 24); 
+                do Output.printString("The ball is out!");
+                do Output.println(); 
+                do ball.reset();
+                do paddle.reset();
+                do ball.is_in();
+                do Sys.wait(500);
+                do Sys.wait(500);
+            }
+            if(ball.get_out_counter() = 5){
+                do ball.reset();
+                do paddle.reset();
+
+                do Screen.clearScreen();
+                do Output.moveCursor(9, 24); 
+                do Output.printString("You lost 5 times!");
+                do Output.println(); 
+                do Sys.wait(750);
+
+                do Screen.clearScreen();
+                let col = 0;
+                while (col < 256) {
+                    let row = 0;
+                    while (row < 512) {
+                        do Screen.drawPixel(row, col);
+                        let row = row + 1;
+                    }
+                    let col = col + 1;
+                }
+                do Sys.wait(750);
+                
+                do Screen.setColor(false);
+                let row = 255;
+                while(row > (-1)){
+                    let col = 0;
+                    while (col < 512) {
+                        do Screen.drawPixel(col, row);
+                        let col = col + 1;
+                    }
+                    let row = row - 1;
+                }
+                do Screen.setColor(true);
+                do Output.moveCursor(9, 28); 
+                let print_string = String.new(10); 
+                do print_string.appendChar(84);  
+                do print_string.appendChar(114); 
+                do print_string.appendChar(121); 
+                do print_string.appendChar(32);   
+                do print_string.appendChar(97); 
+                do print_string.appendChar(103);
+                do print_string.appendChar(97); 
+                do print_string.appendChar(105);
+                do print_string.appendChar(110); 
+                do print_string.appendChar(33); 
+                do Output.printString(print_string);
+                do Output.println(); 
+                do print_string.dispose();
+                do Sys.wait(750);
+                do ball.reset_out_counter();
+                do Sys.wait(500);
+            }
+
+            do Sys.wait(5);
+        }
+        return;
+    }
+
+    method boolean checkCollision(){
+        var int ball_x, ball_y, paddle_x, paddle_y, paddle_w, paddle_h;
+        var boolean flag_value;
+        let flag_value = false;
+
+        let ball_x = ball.get_x();
+        let ball_y = ball.get_y();
+
+        let paddle_x = paddle.get_x();
+        let paddle_y = paddle.get_y();
+
+        let paddle_w = paddle.get_width();
+        let paddle_h = paddle.get_height();
+
+        if((ball_x + ball.get_radius()) > paddle_x){
+            if((ball_x - ball.get_radius()) < (paddle_x + paddle_w)){
+                if(ball_y > paddle_y){
+                    if(ball_y < paddle_y + paddle_h){
+                        let flag_value =  true;
+                    }
+                }
+            }
+        }
+        return flag_value;
+    }
+
+    method void draw(){
+        do Screen.clearScreen();
+        do Screen.drawRectangle(paddle.get_x(), paddle.get_y(),
+                                paddle.get_x() + paddle.get_width(),
+                                paddle.get_y() + paddle.get_height());
+
+        do Screen.drawCircle(ball.get_x(), ball.get_y(), ball.get_radius());
+        do square.draw();
+        return;
+    }
+
+    method int mod(int a, int b) {
+        var int x,y,z;
+        let x = Math.divide(a, b);
+        let y = Math.multiply(x, b);
+        let z = a - y;
+        return z;
+    }
+
+    method void dispose() {
+        do paddle.dispose();
+        do ball.dispose();
+        return;
+    }
+}
