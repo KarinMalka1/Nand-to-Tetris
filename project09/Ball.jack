@@ -1,0 +1,172 @@
+class Ball {
+    field int x;
+    field int y;
+    field int x_velocity;
+    field int y_velocity;
+    field int radius;
+    field int width;
+    field int height;
+
+    field int wall_collision_counter;
+    field boolean is_out;
+    field int out_counter;
+
+    constructor Ball new() {
+        let x = 250;
+        let y = 150;
+        let x_velocity = 1;
+        let y_velocity = 2;
+        let radius = 10;
+        let wall_collision_counter = 0;
+        let is_out = false;
+        let out_counter = 0;
+        return this;
+    }
+
+
+    method void move(){
+        let x = x + x_velocity;
+        let y = y + y_velocity;
+
+        if(y < 30) {
+            let y = 30;
+            let y_velocity = -y_velocity;
+            let wall_collision_counter = wall_collision_counter + 1;
+        } 
+        else {
+            if (y > 225) {
+                let is_out = true;
+                let out_counter = out_counter + 1;
+                let y = 225;
+                let y_velocity = -y_velocity;
+                let wall_collision_counter = wall_collision_counter + 1;
+            }
+        }
+        if(x < 30){
+            let x = 30;
+            let x_velocity = -x_velocity;
+            let wall_collision_counter = wall_collision_counter + 1;
+        }
+        else{
+            if(x > 480){
+                let x = 480;
+                let x_velocity = -x_velocity;
+                let wall_collision_counter = wall_collision_counter + 1;
+            }
+        }
+        return;
+    }
+
+    method void flip_x() {
+        let x_velocity = -x_velocity;
+        return;
+    }
+
+    method void flip_y() {
+        let y_velocity = -y_velocity;
+        return;
+    }
+
+    method void reset() {
+        let x = 250;
+        let y = 150;
+        let x_velocity = 1;
+        let y_velocity = 2;
+        return;
+    }
+
+    method int get_x() {
+        return x;
+    }
+
+    method int get_y() {
+        return y;
+    }
+
+    method int get_radius() {
+        return radius;
+    }
+
+    method int get_wall_counter(){
+        return wall_collision_counter;
+    }
+    method void increase_wall_counter(){
+        let wall_collision_counter = wall_collision_counter + 1;
+        return;
+    }
+
+    method void dispose() {
+        return;
+    }
+
+    method void reduce_radius(){
+        var int x;
+        let x = get_radius();
+        let radius = x - 3;
+        return;
+    }
+
+    method void increase_radius(){
+        var int x;
+        let x = get_radius();
+        let radius = x + 3;
+        return;
+    }
+
+    method void increase_velocity(){
+        let x_velocity = x_velocity + 1;
+        let y_velocity = y_velocity + 1;
+        return;
+    }
+    method void reduce_velocity(){
+        let x_velocity = x_velocity - 1;
+        let y_velocity = y_velocity - 1;
+        return;
+    }
+    method boolean get_is_out(){
+        var boolean x;
+        let x = is_out;
+        return x;
+    }
+
+    method void is_in(){
+        let is_out = false;
+        return;
+    }
+
+    method void set_x(int new_x) {
+        let x = new_x;
+        return;
+    }
+
+    method void set_y(int new_y) {
+        let y = new_y;
+        return;
+    }
+
+    method void set_size(int w, int h) {
+        let width = w;
+        let height = h;
+        return;
+    }
+
+    method void set_radius(int r) {
+        let radius = r;
+        return;
+    }
+
+    method void set_velocity(int vx, int vy) {
+        let x_velocity = vx;
+        let y_velocity = vy;
+        return;
+    }
+    method int get_out_counter(){
+        var int x;
+        let x = out_counter;
+        return x;
+    }
+    method void reset_out_counter(){
+        let out_counter = 0;
+        return;
+    }
+}
